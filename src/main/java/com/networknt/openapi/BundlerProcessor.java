@@ -44,7 +44,8 @@ public class BundlerProcessor {
 
     // we have to handle components as a separate map, otherwise, we will have
     // concurrent modification exception while iterating the map and updating components.
-    final Map<String, Object> definitions = new HashMap<>();
+    final Map<String, Object> schemaDefinitions = new HashMap<>();
+    final Map<String, Object> parameterDefinitions = new HashMap<>();
 
     // stack to maintain relative location state
     private final Deque<Path> workingDirs = new LinkedList<>();
@@ -92,14 +93,18 @@ public class BundlerProcessor {
                 s -> new HashMap<String, Object>()));
         Map<String, Object> schemasMap = castIt(componentsMap.computeIfAbsent("schemas",
                 s -> new HashMap<String, Object>()));
+        Map<String, Object> parametersMap = castIt(componentsMap.computeIfAbsent("parameters",
+                s -> new HashMap<String, Object>()));
 
-        definitions.putAll(schemasMap);
+        schemaDefinitions.putAll(schemasMap);
+        parameterDefinitions.putAll(parametersMap);        
 
         // now let's handle the references.
         resolveMap(map);
 
         // add the resolved components to the main map, before persisting
-        schemasMap.putAll(definitions);
+        schemasMap.putAll(schemaDefinitions);
+        parametersMap.putAll(parameterDefinitions);
 
         Matcher m = FILE_EXTS.matcher(outputFile);
         if (m.matches()) {
@@ -177,7 +182,7 @@ public class BundlerProcessor {
             int hashIndex = pointer.indexOf("#");
             if (hashIndex == 0) {
                 // There are two cases with local reference. 1, original in
-                // local reference and it has path of "definitions" or 2, local reference
+                // local reference and it has path of "schemaDefinitions" or 2, local reference
                 // that extracted from reference file with reference to an object directly.
                 String refKey = pointer.substring(pointer.lastIndexOf("/") + 1);
 
@@ -186,11 +191,11 @@ public class BundlerProcessor {
                 if (pointer.contains("components")) {
                     // if the $ref is an object, keep it that way and if $ref is not an object, make
                     // it inline
-                    // and remove it from definitions.
-                    Map<String, Object> refMap =castIt(definitions.get(refKey));
+                    // and remove it from schemaDefinitions.
+                    Map<String, Object> refMap =castIt(schemaDefinitions.get(refKey));
                     if (refMap == null) {
-                        LOG.error("Could not find reference in definitions for key {}", refKey);
-                        throw new BundlerException("Could not find reference in definitions for key " + refKey);
+                        LOG.error("Could not find reference in schemaDefinitions for key {}", refKey);
+                        throw new BundlerException("Could not find reference in schemaDefinitions for key " + refKey);
                     }
                     if (isRefMapObject(refMap)) {
                         result.put(REF, pointer);
@@ -214,7 +219,7 @@ public class BundlerProcessor {
                                                           + ". Please check your components section.");
                     }
                     if (isRefMapObject(refMap)) {
-                        definitions.put(refKey, refMap);
+                        schemaDefinitions.put(refKey, refMap);
                         result.put(REF, "#/components/schemas/" + refKey);
                     } else {
                         result = refMap;
@@ -231,13 +236,13 @@ public class BundlerProcessor {
 
                 // check if the refMap type is object or not.
                 if (isRefMapObject(refMap)) {
-                    // add to definitions
+                    // add to schemaDefinitions
                     String refKey = refMap.get(isExtRef ? EXT_REF : "title").toString();
                     if (refKey == null) {
                         throw new BundlerException("Unable to determine refKey for pointer: " + pointer);
                     }
 
-                    definitions.put(refKey, refMap);
+                    schemaDefinitions.put(refKey, refMap);
                     // update the ref pointer to local
                     result.put(REF, "#/components/schemas/" + refKey);
                 } else {
