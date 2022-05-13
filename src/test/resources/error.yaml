@@ -1,7 +1,25 @@
 Error:
   type: object
   required:
-  - statusCode
-  - code
-  - message
-  - description
+    - statusCode
+    - code
+    - message
+    - description
+  properties:
+    statusCode:
+      type: integer
+      format: int32
+    code:
+      type: string
+    severityCode:
+      description: This code identifies the severity of an API error.  This code indicates whether there is an API-level error, warning, information message that might need to be communicated to the client or if a severe error has occurred.
+      type: string
+      enum:
+        - INFO
+        - WARN
+        - ERROR
+        - SEVERE
+    message:
+      type: string
+    description:
+      type: string
