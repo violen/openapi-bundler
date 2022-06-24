@@ -6,32 +6,32 @@
         {
             "label": "verify",
             "type": "shell",
-            "command": "mvn -B verify",
+            "command": "${workspaceFolder}${pathSeparator}mvnw -B verify",
             "group": "build"
         },
         {
             "label": "test",
             "type": "shell",
-            "command": "mvn -B test",
+            "command": "${workspaceFolder}${pathSeparator}mvnw -B test",
             "group": "test",
             "dependsOn": "rebuildTest"
         },
         {
             "label": "clean",
             "type": "shell",
-            "command": "mvn -B clean",
+            "command": "${workspaceFolder}${pathSeparator}mvnw -B clean",
             "group": "build"
         },
         {
             "label": "compile",
             "type": "shell",
-            "command": "mvn -B compile",
+            "command": "${workspaceFolder}${pathSeparator}mvnw -B compile",
             "group": "build"
         },
         {
             "label": "testCompile",
             "type": "shell",
-            "command": "mvn -B test-compile",
+            "command": "${workspaceFolder}${pathSeparator}mvnw -B test-compile",
             "group": "build"
         },
         {
@@ -42,7 +42,15 @@
         {
             "label": "rebuildTest",
             "dependsOn": ["clean", "compile", "testCompile"],
-            "dependsOrder": "sequence"
+            "dependsOrder": "sequence",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
         }
     ],
 }
