@@ -1,0 +1,6 @@
+{
+    "java.configuration.runtimes": [
+        {"default": true, "name": "JavaSE-11", "path": "C:\\TemurinJDK\\11"}
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic"
+}
